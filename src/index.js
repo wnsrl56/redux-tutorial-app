@@ -1,15 +1,26 @@
 import React from "react";
-import ReactDOM from "react-dom";
+import { render } from "react-dom";
+import {applyMiddleware, compose, createStore} from "redux";
 import App from "./App";
+import rootReducer from "./redux/reducers";
 import { Provider } from "react-redux";
-import { createStore } from "redux";
-import rootReducer from "./reducers";
+import createSagaMiddleware from 'redux-saga';
+import index from './redux/sagas';
+import {logger} from "redux-logger";
 
-const store = createStore(rootReducer);
+// REDUX DEVTOOLS 용도
+const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+const sagaMiddleware = createSagaMiddleware();
+const store = createStore(rootReducer, composeEnhancers(applyMiddleware(sagaMiddleware, logger)));
 
-ReactDOM.render(
-  <Provider store={store}>
-    <App />
-  </Provider>,
+//sagaMiddleware 는 store 생성 후, 실행
+sagaMiddleware.run(index);
+
+render(
+    <React.StrictMode>
+        <Provider store={store}>
+            <App />
+        </Provider>
+    </React.StrictMode>,
   document.getElementById("root")
 );
